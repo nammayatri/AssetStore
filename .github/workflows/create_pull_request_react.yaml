@@ -1,29 +1,31 @@
-name: Handle Incoming Changes
+name: Handle Incoming Changes for React Branches
 
 on:
-  repository_dispatch:
-    types: [trigger_workflow]
+  create:
+    branches:
+      - 'react-*'  
 
 jobs:
   handle_changes:
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/heads/react-') 
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.client_payload.branch }}
-
+          ref: ${{ github.event.ref }}
+      
       - name: Create Pull Request
         run: |
           # Set variables
           REPO_OWNER=${{ github.repository_owner }}
           REPO_NAME=${{ github.event.repository.name }}
           BASE_BRANCH=main
-          HEAD_BRANCH=${{ github.event.client_payload.branch }}
+          HEAD_BRANCH=${{ github.event.ref }}
           TITLE="Merge ${HEAD_BRANCH} into ${BASE_BRANCH}"
           BODY="Created by GitHub action"
-          TOKEN=${{ secrets.PAT_TOKEN }}
+          TOKEN=${{ secrets.GITHUB_TOKEN }}
   
           # Create pull request using curl
           curl -X POST \
